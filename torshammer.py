@@ -91,9 +91,8 @@ class httpPost(Thread):
                     print term.BOL+term.UP+term.CLEAR_EOL+"Connected to host..."+ term.NORMAL
                     break
                 except Exception, e:
-                    if e.args[0] == 106 or e.args[0] == 60:
-                        break
                     print term.BOL+term.UP+term.CLEAR_EOL+"Error connecting to host..."+ term.NORMAL
+                    print e
                     time.sleep(1)
                     continue
 	
